@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoebox - Your Private Media Gallery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #fafaf8;
+            --bg-secondary: #f2f1ed;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --accent: #2d5a3d;
+            --accent-light: #4a8c5f;
+            --border: #ddd;
+            --privacy-green: #2d5a3d;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --card-bg: #ffffff;
+            --drop-zone-bg: #ffffff;
+            --drop-zone-hover: #f9fdf9;
+            --drop-zone-drag: #f0f8f0;
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #242424;
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0a0a0;
+            --accent: #4a8c5f;
+            --accent-light: #5fa876;
+            --border: #404040;
+            --privacy-green: #5fa876;
+            --shadow: rgba(0, 0, 0, 0.4);
+            --card-bg: #2a2a2a;
+            --drop-zone-bg: #2a2a2a;
+            --drop-zone-hover: #2f3a2f;
+            --drop-zone-drag: #2d3f2d;
+            --input-bg: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .privacy-banner {
+            background: linear-gradient(135deg, var(--privacy-green), var(--accent-light));
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            letter-spacing: 0.3px;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.6s ease-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .privacy-banner .lock-icon {
+            font-size: 1.1em;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        .drop-zone {
+            background: var(--drop-zone-bg);
+            border: 3px dashed var(--border);
+            border-radius: 16px;
+            padding: 80px 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.8s ease-out 0.4s both;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover {
+            border-color: var(--accent);
+            background: var(--drop-zone-hover);
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--drop-zone-drag);
+            transform: scale(1.02);
+        }
+
+        .drop-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.4;
+        }
+
+        .drop-zone h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .drop-zone p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Work Sans', sans-serif;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(45, 90, 61, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Ad Space */
+        .ad-container {
+            margin: 50px 0;
+            animation: fadeIn 0.8s ease-out 0.6s both;
+        }
+
+        .ad-label {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-align: center;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .ad-space {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ad-content {
+            width: 100%;
+            max-width: 970px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-style: italic;
+            padding: 40px 20px;
+        }
+
+        /* Search and Controls */
+        .controls-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 15px var(--shadow);
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Work Sans', sans-serif;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(45, 90, 61, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .clear-btn {
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .clear-btn:hover {
+            background: var(--border);
+        }
+
+        .gallery-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn, .filter-btn, .sort-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Work Sans', sans-serif;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .view-btn:hover, .filter-btn:hover, .sort-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .view-btn.active, .filter-btn.active, .sort-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .sort-select {
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: 'Work Sans', sans-serif;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .gallery-stats {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding: 10px 0;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .gallery.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .media-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 15px var(--shadow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: scaleIn 0.5s ease-out both;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .media-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .media-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 75%;
+            background: var(--bg-secondary);
+            overflow: hidden;
+        }
+
+        .gallery.list-view .media-wrapper {
+            padding-top: 40%;
+        }
+
+        .media-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .media-info {
+            padding: 20px;
+        }
+
+        .media-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .media-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .media-type {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .media-size {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+        }
+
+        .lightbox-media {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .lightbox-close:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-nav:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .lightbox-prev {
+            left: 20px;
+        }
+
+        .lightbox-next {
+            right: 20px;
+        }
+
+        .lightbox-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            margin: 50px 0;
+            box-shadow: 0 2px 15px var(--shadow);
+            animation: fadeIn 0.8s ease-out 0.5s both;
+        }
+
+        .faq-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid var(--border);
+            padding: 20px 0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Work Sans', sans-serif;
+            transition: color 0.3s ease;
+        }
+
+        .faq-question:hover {
+            color: var(--accent);
+        }
+
+        .faq-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+            color: var(--accent);
+        }
+
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+            padding-top: 15px;
+        }
+
+        .faq-answer p {
+            margin-bottom: 10px;
+        }
+
+        .faq-answer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .faq-answer a:hover {
+            color: var(--accent-light);
+            text-decoration: underline;
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .contact-section h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .contact-section p {
+            margin-bottom: 20px;
+            opacity: 0.95;
+        }
+
+        .telegram-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: var(--accent);
+            padding: 12px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-family: 'Work Sans', sans-serif;
+        }
+
+        .telegram-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .drop-zone {
+                padding: 50px 25px;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+
+            .privacy-banner {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .gallery-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                justify-content: center;
+            }
+
+            .faq-section {
+                padding: 25px;
+            }
+
+            .faq-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (min-width: 970px) {
+            .ad-space {
+                min-height: 250px;
+            }
+        }
+
+        @media (max-width: 969px) and (min-width: 728px) {
+            .ad-space {
+                min-height: 90px;
+            }
+        }
+
+        @media (max-width: 727px) {
+            .ad-space {
+                min-height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="privacy-banner">
+        <div>
+            <span class="lock-icon">🔒</span>
+            <strong>100% Local & Private</strong> — All files stay on your device. No uploads. No tracking.
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <span id="themeIcon">🌙</span>
+            <span id="themeText">Dark Mode</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Shoebox</h1>
+            <p class="subtitle">Your private photo & video gallery</p>
+        </header>
+
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-icon">📁</div>
+            <h2>Drag & Drop Your Files Here</h2>
+            <p>Or click below to browse</p>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">Choose Files</button>
+        </div>
+
+        <input type="file" id="fileInput" multiple accept="image/*,video/*">
+
+        <div class="faq-section">
+            <h2 class="faq-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is my data really private?</span>
+                    <span class="faq-icon">▼</span>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes! Shoebox runs entirely in your browser. Your files never leave your device. You can verify this by opening your browser's Developer Tools (F12) and checking the Network tab - you'll see zero uploads to any server.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>How does it work offline?</span>
+                    <span class="faq-icon">▼</span>
+                </button>
+                <div class="faq-answer">
+                    <p>After loading the page once, Shoebox works completely offline. All file processing happens locally in your browser using JavaScript. No internet connection is needed to browse your media.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>What file types are supported?</span>
+                    <span class="faq-icon">▼</span>
+                </button>
+                <div class="faq-answer">
+                    <p><strong>Images:</strong> JPG, JPEG, PNG, WebP, BMP, SVG</p>
+                    <p><strong>Videos:</strong> MP4, WebM, OGG, MOV, AVI, MKV</p>
+                    <p><strong>Animated:</strong> GIF</p>
+                    <p>Note: Video codec support depends on your browser.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I use this on mobile?</span>
+                    <span class="faq-icon">▼</span>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes! Shoebox is fully responsive and works on mobile browsers. However, file selection capabilities may be limited on iOS. Desktop browsers offer the best experience.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is there a file size limit?</span>
+                    <span class="faq-icon">▼</span>
+                </button>
+                <div class="faq-answer">
+                    <p>The only limit is your browser's available memory. Most modern browsers can handle hundreds of photos or dozens of videos. Performance depends on your device's RAM.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Do you collect any data?</span>
+                    <span class="faq-icon">▼</span>
+                </button>
+                <div class="faq-answer">
+                    <p>No. We don't collect, store, or track any data. The only thing saved is your theme preference (dark/light mode) in your browser's local storage - nothing leaves your device.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I save my gallery for later?</span>
+                    <span class="faq-icon">▼</span>
+                </button>
+                <div class="faq-answer">
+                    <p>Currently, you need to re-select your files each time you load the page. This is intentional for privacy - we don't store references to your files. However, your theme and view preferences are remembered.</p>
+                </div>
+            </div>
+
+            <div class="contact-section">
+                <h3>Still have questions?</h3>
+                <p>Get in touch with us on Telegram for support, feedback, or just to say hi!</p>
+                <a href="https://t.me/shoeboxgal" class="telegram-btn" target="_blank" rel="noopener">
+                    <span>Contact on Telegram</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="ad-container">
+            <div class="ad-label">Advertisement</div>
+            <div class="ad-space">
+                <!-- 
+                =================================================================
+                AD INTEGRATION INSTRUCTIONS
+                =================================================================
+                
+                Replace the .ad-content div below with your ad network code.
+                The container will automatically adapt to common ad sizes:
+                - Desktop: 970×250 (Billboard) or 728×90 (Leaderboard)
+                - Tablet: 728×90 (Leaderboard)
+                - Mobile: 320×100 or 320×50
+                
+                GOOGLE ADSENSE EXAMPLE:
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXX"
+                     crossorigin="anonymous"></script>
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-XXXXX"
+                     data-ad-slot="YYYYY"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+                
+                MEDIA.NET EXAMPLE:
+                <div id="XXXXX"></div>
+                <script type="text/javascript">
+                    // Your Media.net code here
+                </script>
+                
+                CARBON ADS EXAMPLE:
+                <script async type="text/javascript" 
+                    src="//cdn.carbonads.com/carbon.js?serve=XXXXX&placement=YYYYY" 
+                    id="_carbonads_js"></script>
+                
+                For responsive ads, the .ad-space container will resize automatically.
+                =================================================================
+                -->
+                <div class="ad-content">
+                    Your ad code here
+                </div>
+            </div>
+        </div>
+
+        <div id="gallerySection" style="display: none;">
+            <div class="controls-section">
+                <div class="search-bar">
+                    <input 
+                        type="text" 
+                        class="search-input" 
+                        id="searchInput" 
+                        placeholder="Search files by name..." 
+                        oninput="searchFiles()"
+                    >
+                    <button class="clear-btn" onclick="clearSearch()">Clear</button>
+                </div>
+
+                <div class="gallery-controls">
+                    <div class="control-group">
+                        <span class="control-label">View:</span>
+                        <div class="view-toggle">
+                            <button class="view-btn active" onclick="setView('grid')">Grid</button>
+                            <button class="view-btn" onclick="setView('list')">List</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <span class="control-label">Filter:</span>
+                        <div class="filter-group">
+                            <button class="filter-btn active" onclick="filterMedia('all')">All</button>
+                            <button class="filter-btn" onclick="filterMedia('image')">Images</button>
+                            <button class="filter-btn" onclick="filterMedia('video')">Videos</button>
+                            <button class="filter-btn" onclick="filterMedia('gif')">GIFs</button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <span class="control-label">Sort:</span>
+                        <select class="sort-select" id="sortSelect" onchange="sortFiles()">
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="size-asc">Size (Smallest)</option>
+                            <option value="size-desc">Size (Largest)</option>
+                            <option value="type">Type</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="gallery-stats" id="galleryStats">
+                    Showing 0 files
+                </div>
+            </div>
+
+            <div class="gallery" id="gallery"></div>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()">×</button>
+        <button class="lightbox-nav lightbox-prev" onclick="navigateLightbox(-1)">‹</button>
+        <button class="lightbox-nav lightbox-next" onclick="navigateLightbox(1)">›</button>
+        <div class="lightbox-content" id="lightboxContent"></div>
+        <div class="lightbox-info" id="lightboxInfo"></div>
+    </div>
+
+    <script>
+        let mediaFiles = [];
+        let filteredFiles = [];
+        let currentView = 'grid';
+        let currentFilter = 'all';
+        let currentLightboxIndex = 0;
+        let currentSort = 'name-asc';
+        let searchQuery = '';
+
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'bmp', 'svg'];
+        const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'mkv'];
+        const gifExtensions = ['gif'];
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            
+            if (newTheme === 'dark') {
+                icon.textContent = '☀️';
+                text.textContent = 'Light Mode';
+            } else {
+                icon.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+            }
+        }
+
+        // Load saved theme
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Light Mode';
+            }
+        });
+
+        // Drag and drop
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const files = Array.from(e.dataTransfer.files);
+            processFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            processFiles(files);
+        });
+
+        function processFiles(files) {
+            mediaFiles = files.filter(file => {
+                const ext = file.name.split('.').pop().toLowerCase();
+                return [...imageExtensions, ...videoExtensions, ...gifExtensions].includes(ext);
+            });
+
+            if (mediaFiles.length === 0) {
+                alert('No supported media files found. Please select images or videos.');
+                return;
+            }
+
+            applyFiltersAndSort();
+            document.getElementById('gallerySection').style.display = 'block';
+            dropZone.style.display = 'none';
+        }
+
+        function getFileType(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            if (gifExtensions.includes(ext)) return 'gif';
+            if (imageExtensions.includes(ext)) return 'image';
+            if (videoExtensions.includes(ext)) return 'video';
+            return 'unknown';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function searchFiles() {
+            searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            applyFiltersAndSort();
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            searchQuery = '';
+            applyFiltersAndSort();
+        }
+
+        function sortFiles() {
+            currentSort = document.getElementById('sortSelect').value;
+            applyFiltersAndSort();
+        }
+
+        function applyFiltersAndSort() {
+            // Apply filter
+            let files = mediaFiles;
+            
+            if (currentFilter !== 'all') {
+                files = files.filter(file => getFileType(file.name) === currentFilter);
+            }
+
+            // Apply search
+            if (searchQuery) {
+                files = files.filter(file => file.name.toLowerCase().includes(searchQuery));
+            }
+
+            // Apply sort
+            files = [...files].sort((a, b) => {
+                switch (currentSort) {
+                    case 'name-asc':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'size-asc':
+                        return a.size - b.size;
+                    case 'size-desc':
+                        return b.size - a.size;
+                    case 'type':
+                        return getFileType(a.name).localeCompare(getFileType(b.name));
+                    default:
+                        return 0;
+                }
+            });
+
+            filteredFiles = files;
+            updateStats();
+            displayGallery();
+        }
+
+        function updateStats() {
+            const stats = document.getElementById('galleryStats');
+            const total = filteredFiles.length;
+            const images = filteredFiles.filter(f => getFileType(f.name) === 'image').length;
+            const videos = filteredFiles.filter(f => getFileType(f.name) === 'video').length;
+            const gifs = filteredFiles.filter(f => getFileType(f.name) === 'gif').length;
+            
+            stats.textContent = `Showing ${total} file${total !== 1 ? 's' : ''} (${images} image${images !== 1 ? 's' : ''}, ${videos} video${videos !== 1 ? 's' : ''}, ${gifs} GIF${gifs !== 1 ? 's' : ''})`;
+        }
+
+        function displayGallery() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+
+            if (filteredFiles.length === 0) {
+                gallery.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><h2>No files found</h2><p>Try adjusting your search or filters</p></div>';
+                return;
+            }
+
+            filteredFiles.forEach((file, index) => {
+                const item = document.createElement('div');
+                item.className = 'media-item';
+                item.style.animationDelay = `${index * 0.05}s`;
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'media-wrapper';
+                
+                const fileType = getFileType(file.name);
+                const url = URL.createObjectURL(file);
+                
+                if (fileType === 'image' || fileType === 'gif') {
+                    const img = document.createElement('img');
+                    img.className = 'media-content';
+                    img.src = url;
+                    img.alt = file.name;
+                    wrapper.appendChild(img);
+                } else if (fileType === 'video') {
+                    const video = document.createElement('video');
+                    video.className = 'media-content';
+                    video.src = url;
+                    video.muted = true;
+                    video.loop = true;
+                    video.onmouseenter = () => video.play();
+                    video.onmouseleave = () => video.pause();
+                    wrapper.appendChild(video);
+                }
+                
+                const info = document.createElement('div');
+                info.className = 'media-info';
+                info.innerHTML = `
+                    <div class="media-name">${file.name}</div>
+                    <div class="media-meta">
+                        <div class="media-type">${fileType}</div>
+                        <div class="media-size">${formatFileSize(file.size)}</div>
+                    </div>
+                `;
+                
+                item.appendChild(wrapper);
+                item.appendChild(info);
+                item.onclick = () => openLightbox(index);
+                
+                gallery.appendChild(item);
+            });
+        }
+
+        function setView(view) {
+            currentView = view;
+            const gallery = document.getElementById('gallery');
+            const buttons = document.querySelectorAll('.view-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (view === 'list') {
+                gallery.classList.add('list-view');
+            } else {
+                gallery.classList.remove('list-view');
+            }
+        }
+
+        function filterMedia(filter) {
+            currentFilter = filter;
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            applyFiltersAndSort();
+        }
+
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightboxContent');
+            const info = document.getElementById('lightboxInfo');
+            content.innerHTML = '';
+            
+            const file = filteredFiles[index];
+            const fileType = getFileType(file.name);
+            const url = URL.createObjectURL(file);
+            
+            if (fileType === 'image' || fileType === 'gif') {
+                const img = document.createElement('img');
+                img.className = 'lightbox-media';
+                img.src = url;
+                content.appendChild(img);
+            } else if (fileType === 'video') {
+                const video = document.createElement('video');
+                video.className = 'lightbox-media';
+                video.src = url;
+                video.controls = true;
+                video.autoplay = true;
+                content.appendChild(video);
+            }
+            
+            info.textContent = `${file.name} • ${formatFileSize(file.size)} • ${index + 1} of ${filteredFiles.length}`;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            
+            const videos = document.querySelectorAll('#lightboxContent video');
+            videos.forEach(v => v.pause());
+        }
+
+        function navigateLightbox(direction) {
+            currentLightboxIndex += direction;
+            if (currentLightboxIndex < 0) currentLightboxIndex = filteredFiles.length - 1;
+            if (currentLightboxIndex >= filteredFiles.length) currentLightboxIndex = 0;
+            openLightbox(currentLightboxIndex);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'Escape') closeLightbox();
+                if (e.key === 'ArrowLeft') navigateLightbox(-1);
+                if (e.key === 'ArrowRight') navigateLightbox(1);
+            }
+        });
+
+        // Close lightbox on background click
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target.id === 'lightbox') closeLightbox();
+        });
+
+        // FAQ Toggle
+        function toggleFaq(button) {
+            const faqItem = button.parentElement;
+            const isActive = faqItem.classList.contains('active');
+            
+            // Close all FAQs
+            document.querySelectorAll('.faq-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Open clicked FAQ if it wasn't active
+            if (!isActive) {
+                faqItem.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

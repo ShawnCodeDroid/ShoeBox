@@ -584,6 +584,44 @@
             display: none;
         }
 
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px var(--shadow);
+            transform: translateX(400px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+            font-weight: 500;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .btn-small {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
         /* FAQ Section */
         .faq-section {
             background: var(--card-bg);
@@ -771,7 +809,6 @@
 <body>
     <div class="privacy-banner">
         <div>
-            <span class="lock-icon">🔒</span>
             <strong>100% Local & Private</strong> — All files stay on your device. No uploads. No tracking.
         </div>
         <button class="theme-toggle" onclick="toggleTheme()">
@@ -942,6 +979,11 @@
 
                 <div class="gallery-controls">
                     <div class="control-group">
+                        <button class="btn btn-small" onclick="loadMoreFiles()">+ Add More Files</button>
+                        <button class="btn btn-small btn-secondary" onclick="clearAllFiles()">Clear All</button>
+                    </div>
+
+                    <div class="control-group">
                         <span class="control-label">View:</span>
                         <div class="view-toggle">
                             <button class="view-btn active" onclick="setView('grid')">Grid</button>
@@ -1055,23 +1097,71 @@
 
         fileInput.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
-            processFiles(files);
+            const isFirstLoad = mediaFiles.length === 0;
+            processFiles(files, isFirstLoad);
+            // Reset input so same files can be selected again if needed
+            e.target.value = '';
         });
 
-        function processFiles(files) {
-            mediaFiles = files.filter(file => {
+        function processFiles(files, isFirstLoad = true) {
+            const newFiles = files.filter(file => {
                 const ext = file.name.split('.').pop().toLowerCase();
                 return [...imageExtensions, ...videoExtensions, ...gifExtensions].includes(ext);
             });
 
-            if (mediaFiles.length === 0) {
+            if (newFiles.length === 0) {
                 alert('No supported media files found. Please select images or videos.');
                 return;
             }
 
+            // Append new files to existing ones (avoid duplicates by name)
+            const existingNames = new Set(mediaFiles.map(f => f.name));
+            const uniqueNewFiles = newFiles.filter(f => !existingNames.has(f.name));
+            
+            mediaFiles = [...mediaFiles, ...uniqueNewFiles];
+
             applyFiltersAndSort();
             document.getElementById('gallerySection').style.display = 'block';
-            dropZone.style.display = 'none';
+            
+            if (isFirstLoad) {
+                dropZone.style.display = 'none';
+            }
+
+            // Show notification of how many files were added
+            if (!isFirstLoad && uniqueNewFiles.length > 0) {
+                showNotification(`Added ${uniqueNewFiles.length} new file${uniqueNewFiles.length !== 1 ? 's' : ''}`);
+            }
+        }
+
+        function loadMoreFiles() {
+            document.getElementById('fileInput').click();
+        }
+
+        function clearAllFiles() {
+            if (confirm('Are you sure you want to clear all files? This cannot be undone.')) {
+                mediaFiles = [];
+                filteredFiles = [];
+                document.getElementById('gallerySection').style.display = 'none';
+                dropZone.style.display = 'block';
+                // Reset file input
+                document.getElementById('fileInput').value = '';
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 2000);
         }
 
         function getFileType(filename) {
